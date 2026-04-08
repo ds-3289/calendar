@@ -16,7 +16,6 @@ const Calendar: React.FC<CalendarProps> = ({ year = 2026 }) => {
   const [endDate, setEndDate] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
-  const darkBgVideoRef = useRef<HTMLVideoElement>(null);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -49,18 +48,12 @@ const Calendar: React.FC<CalendarProps> = ({ year = 2026 }) => {
   // Handle theme change and background video
   useEffect(() => {
     if (isDarkMode) {
-      if (darkBgVideoRef.current) {
-        darkBgVideoRef.current.play().catch(err => console.log('Dark background video autoplay prevented:', err));
-      }
       if (bgVideoRef.current) {
         bgVideoRef.current.pause();
       }
     } else {
       if (bgVideoRef.current) {
         bgVideoRef.current.play().catch(err => console.log('Light background video autoplay prevented:', err));
-      }
-      if (darkBgVideoRef.current) {
-        darkBgVideoRef.current.pause();
       }
     }
   }, [isDarkMode]);
@@ -166,6 +159,9 @@ const Calendar: React.FC<CalendarProps> = ({ year = 2026 }) => {
         <div className="ring-bar"></div>
       </div>
 
+      {/* Dark mode solid black background */}
+      {isDarkMode && <div className="dark-background"></div>}
+
       {/* Background Video for Light Theme */}
       {!isDarkMode && (
         <video
@@ -177,21 +173,6 @@ const Calendar: React.FC<CalendarProps> = ({ year = 2026 }) => {
           playsInline
         >
           <source src="/light-bg.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      )}
-
-      {/* Background Video for Dark Theme */}
-      {isDarkMode && (
-        <video
-          ref={darkBgVideoRef}
-          className="background-video"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
-          <source src="/dark-bg.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       )}
