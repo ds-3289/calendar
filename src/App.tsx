@@ -1,121 +1,128 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Rings } from './components/UI/Rings';
+import { VideoPanel } from './components/Calendar/VideoPanel';
+import { CalendarGrid } from './components/Calendar/CalendarGrid';
+import { NotesSection } from './components/Notes/NotesSection';
+import { useCalendar } from './hooks/useCalendar';
+import { usePageTearAnimation } from './hooks/usePageTearAnimation';
+import { Button } from './components/UI/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [themeColor, setThemeColor] = useState('#8B7355');
+  const { currentMonth, dateRange, hoverDate, changeMonth, selectDate, setHoverDate } = useCalendar();
+  const { controls, isAnimating, animatePageTear } = usePageTearAnimation();
+
+  const handleMonthChange = async (direction: 'prev' | 'next') => {
+    if (isAnimating) return;
+    await animatePageTear();
+    changeMonth(direction);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="min-h-screen bg-[#faf9f6] font-sans">
+      {/* Desktop Layout */}
+      <div className="hidden lg:flex min-h-screen">
+        {/* Left Video Panel - 35% */}
+        <div className="w-[35%] fixed left-0 top-0 h-screen">
+          <VideoPanel
+            videoUrl={currentMonth.videoUrl}
+            onColorExtracted={setThemeColor}
+            isChanging={isAnimating}
+          />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+
+        {/* Right Calendar Panel - 65% */}
+        <motion.div 
+          className="ml-[35%] w-[65%] min-h-screen relative"
+          animate={controls}
         >
-          Count is {count}
-        </button>
-      </section>
+          <Rings />
+          
+          <div className="max-w-4xl mx-auto px-12 py-16">
+            {/* Month Header */}
+            <div className="flex justify-between items-center mb-12">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleMonthChange('prev')}
+                className="hover:bg-black/5"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              
+              <motion.h1 
+                key={currentMonth.name}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-5xl font-serif font-light tracking-wide"
+                style={{ color: themeColor }}
+              >
+                {currentMonth.name} {currentMonth.year}
+              </motion.h1>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleMonthChange('next')}
+                className="hover:bg-black/5"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </Button>
+            </div>
 
-      <div className="ticks"></div>
+            {/* Calendar Grid */}
+            <CalendarGrid
+              month={currentMonth}
+              dateRange={dateRange}
+              hoverDate={hoverDate}
+              themeColor={themeColor}
+              onDateSelect={selectDate}
+              onDateHover={setHoverDate}
+            />
+          </div>
+        </motion.div>
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* Mobile Layout */}
+      <div className="lg:hidden">
+        <div className="h-[250px] relative">
+          <VideoPanel
+            videoUrl={currentMonth.videoUrl}
+            onColorExtracted={setThemeColor}
+            isChanging={isAnimating}
+          />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        
+        <div className="px-4 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <Button variant="ghost" size="sm" onClick={() => handleMonthChange('prev')}>
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <h2 className="text-2xl font-serif" style={{ color: themeColor }}>
+              {currentMonth.name} {currentMonth.year}
+            </h2>
+            <Button variant="ghost" size="sm" onClick={() => handleMonthChange('next')}>
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <CalendarGrid
+            month={currentMonth}
+            dateRange={dateRange}
+            hoverDate={hoverDate}
+            themeColor={themeColor}
+            onDateSelect={selectDate}
+            onDateHover={setHoverDate}
+          />
         </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Notes Section - Full Width */}
+      <NotesSection themeColor={themeColor} />
+    </div>
+  );
 }
 
-export default App
+export default App;
